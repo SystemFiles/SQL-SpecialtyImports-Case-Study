@@ -29,9 +29,18 @@ CREATE OR REPLACE VIEW sales_invoice AS
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
   SELECT * 
   FROM sales_invoice
-  WHERE UPPER(saleinv#) LIKE UPPER('&p_invoiceno%');
+  WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
 
 -- Create new VIR Entry -- (TEMP TOTAL COST/PRICE NUMBERS)
+ACCEPT p_name PROMPT 'Enter customers name: '
+ACCEPT p_street PROMPT 'Enter customers street: '
+ACCEPT p_city PROMPT 'Enter customers city: '
+ACCEPT p_prov PROMPT 'Enter customers province: '
+
+
+  INSERT INTO tbl_customer (cname, cstreet, ccity, cprov)
+    VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
+      
 ACCEPT p_carserial PROMPT 'Enter car serial #: '
 ACCEPT p_carmake PROMPT 'Enter car make: '
 ACCEPT p_carmodel PROMPT 'Enter car model: '
@@ -49,16 +58,17 @@ ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
+
   INSERT INTO tbl_car (serialno, cname, carmake, carmodel, caryear, carcolor,
     cartrim, enginetype, purchaseinvoice, purchasedate, purchasefrom, purchasecost,
     freightcost, totalcost, listprice)
       VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
-        TO_DATE('&p_purchasedate'), '&p_purchasefrom', '&p_purchasecost', '&p_freightcost',
-        50000, '&p_listprice');
-  INSERT INTO tbl_options (ocode, odesc, olist, ocost)
-    VALUES ('&p_optioncode', '&p_optiondesc', '&p_optionprice', 
-      '&p_optioncost');
+        TO_DATE('&p_purchasedate'), '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
+        (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
+   INSERT INTO tbl_options (ocode, odesc, olist, ocost)
+      VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
+          TO_NUMBER('&p_optioncost'));
 
 -- Vehicle Inventory Record View --
 CREATE OR REPLACE VIEW vehicle_inventory_record AS
@@ -103,9 +113,9 @@ ACCEPT p_labourcost PROMPT 'Enter labour cost: '
 ACCEPT p_tax PROMPT 'Enter tax amount: '
   INSERT INTO tbl_service_invoice (svcinvoice, servicedate, cname, serialno,
     partcost, labourcost, tax, totalcost)
-      VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', '&p_partcost',
-        '&p_labourcost', '&p_tax', SUM(DOUBLE('&p_partcost'), DOUBLE('&p_labourcost'),
-        DOUBLE('&p_tax')));
+      VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
+        TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), SUM(TO_NUMBER('&p_partcost'), TO_NUMBER('&p_labourcost'),
+        TO_NUMBER('&p_tax')));
   INSERT INTO tbl_customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
       '&p_hphone', '&p_bphone');
@@ -114,8 +124,8 @@ ACCEPT p_tax PROMPT 'Enter tax amount: '
     freightcost, totalcost, listprice)
       VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
-        '&p_purchasedate', '&p_purchasefrom', '&p_purchasecost', '&p_freightcost',
-        SUM(DOUBLE('&p_purchasecost'), DOUBLE('&p_freightcost')), '&p_listprice');
+        '&p_purchasedate', '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
+        SUM(TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
   INSERT INTO tbl_service_work (svcinvoice, workdesc)
     VALUES (p_invno, p_workdesc);
 
@@ -172,8 +182,8 @@ ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
   INSERT INTO tbl_options (ocode, odesc, olist, ocost)
-    VALUES ('&p_optioncode', '&p_optiondesc', '&p_optionprice', 
-      '&p_optioncost');
+    VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
+      TO_NUMBER('&p_optioncost'));
   INSERT INTO tbl_prospect_list (cname, carmake, carmodel, caryear, carcolor, 
     cartrim, ocode)
       VALUES ('&p_name', '&p_carmake', '&p_carmodel', '&p_caryear',
