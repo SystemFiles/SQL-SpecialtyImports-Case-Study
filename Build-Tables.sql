@@ -125,7 +125,8 @@ CREATE TABLE servinv (
   -- ADD CONSTRAINTS --
     CONSTRAINT pk_servInv_svcinvoice PRIMARY KEY(servinv),
     CONSTRAINT fk_servInv_cname FOREIGN KEY(CName) REFERENCES customer(CName),
-    CONSTRAINT fk_servInv_carserialno FOREIGN KEY(serial) REFERENCES car(serial)
+    CONSTRAINT fk_servInv_carserialno FOREIGN KEY(serial) REFERENCES car(serial),
+    CONSTRAINT fk_servInv_servInvWork FOREIGN KEY(servinv) REFERENCES servwork(servinv)
 );
 
 -- SALES INVOICE TABLE --
