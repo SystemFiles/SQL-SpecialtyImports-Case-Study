@@ -7,7 +7,7 @@ DROP TABLE saleinv;
 DROP TABLE servinv;
 DROP TABLE servwork;
 DROP TABLE employee;
-DROP TABLE invoice_option;
+DROP TABLE invoption;
 DROP TABLE prospect;
 DROP TABLE baseoption;
 DROP TABLE car;

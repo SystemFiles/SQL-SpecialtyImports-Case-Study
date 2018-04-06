@@ -72,8 +72,6 @@ ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
 ACCEPT p_city PROMPT 'Enter customers city: '
 ACCEPT p_prov PROMPT 'Enter customers province: '
-
-
   INSERT INTO tbl_customer (cname, cstreet, ccity, cprov)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
       
@@ -94,7 +92,6 @@ ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
-
   INSERT INTO tbl_car (serialno, cname, carmake, carmodel, caryear, carcolor,
     cartrim, enginetype, purchaseinvoice, purchasedate, purchasefrom, purchasecost,
     freightcost, totalcost, listprice)
