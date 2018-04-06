@@ -4,8 +4,44 @@
 
 -- TODO: Fix all numerical inputs to be converter, Fix summing of data, 
 -- And fix ordering of data entry so no primary keys are missing, Finish Sales Invoice Data Entry
+-- Rename all tables to their correct names
 
 -- Create Entry Sales Invoice --
+ACCEPT p_saleinv PROMPT 'Enter sales invoice #: '
+-- SET SALE DATE AS SYSDATE
+ACCEPT p_name PROMPT 'Enter customers name: '
+ACCEPT p_street PROMPT 'Enter customers street: '
+ACCEPT p_city PROMPT 'Enter customers city: '
+ACCEPT p_prov PROMPT 'Enter customers province: '
+ACCEPT p_postal PROMPT 'Enter customers postal code: '
+ACCEPT p_hphone PROMPT 'Enter home phone #: '
+ACCEPT p_bphone PROMPT 'Enter work phone #: '
+ACCEPT p_empname PROMPT 'Enter name of salesman: '
+ACCEPT p_carserial PROMPT 'Enter car serial #: '
+ACCEPT p_carmake PROMPT 'Enter car make: '
+ACCEPT p_carmodel PROMPT 'Enter car model: '
+ACCEPT p_caryear PROMPT 'Enter car year: '
+ACCEPT p_carcolor PROMPT 'Enter car color: '
+ACCEPT p_cartrim PROMPT 'Enter car trim: '
+ACCEPT p_carengine PROMPT 'Enter engine type: '
+ACCEPT p_salescovFire PROMPT 'Fire damage coverage? [Y/N]: '
+ACCEPT p_salescovCol PROMPT 'Collision damage coverage? [Y/N]: '
+ACCEPT p_salescovLiab PROMPT 'Liability damage coverage? [Y/N]: '
+ACCEPT p_salescovProp PROMPT 'Property damage coverage? [Y/N]: '
+ACCEPT p_optioncode PROMPT 'Enter options code: '
+ACCEPT p_optiondesc PROMPT 'Enter description of option: '
+ACCEPT p_optionprice PROMPT 'Enter list price of option: '
+ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
+ACCEPT p_tradeserial PROMPT 'Enter trade-in-car serial: '
+ACCEPT p_trademake PROMPT 'Enter trade-in-car make: '
+ACCEPT p_trademodel PROMPT 'Enter trade-in-car model: '
+ACCEPT p_tradeyear PROMPT 'Enter trade-in-car year: '
+ACCEPT p_tradecolor PROMPT 'Enter trade-in-car color: '
+ACCEPT p_tradetrim PROMPT 'Enter trade-in-car trim: '
+ACCEPT p_salestallow PROMPT 'Enter trade-in-car allowance: '
+ACCEPT p_salesdiscount PROMPT 'Enter Discount on car: '
+ACCEPT p_salestax PROMPT 'Enter sales tax: '
+  -- FOLLOW WITH INSERT STATEMENTS --
 
 
 -- Sales Invoice View --
@@ -17,13 +53,13 @@ CREATE OR REPLACE VIEW sales_invoice AS
     TCAR.carmake AS trademake, TCAR.carmodel AS trademodel, TCAR.caryear AS tradeyear, 
     SI.tradeallowance, SI.totalprice, SI.discount, SI.net, 
     SI.tax, ((SI.net + SI.tax) - (SI.discount + SI.tradeallowance)) AS "Total Payable" 
-  FROM tbl_sales_invoice SI
-    JOIN tbl_customer CUST ON SI.cname = CUST.cname
-    JOIN tbl_employee EMP ON SI.empname = EMP.empname
-    JOIN tbl_car CAR ON SI.serialno = CAR.serialno
-    JOIN tbl_base_option BO ON CAR.serialno = BO.serialno
-    JOIN tbl_options OPT ON BO.ocode = OPT.ocode
-    JOIN tbl_car TCAR ON SI.tradeserial = TCAR.serialno;
+  FROM saleinv SI
+    JOIN customer CUST ON SI.cname = CUST.cname
+    JOIN employee EMP ON SI.empname = EMP.empname
+    JOIN car CAR ON SI.serialno = CAR.serialno
+    JOIN baseoption BO ON CAR.serialno = BO.serialno
+    JOIN options OPT ON BO.ocode = OPT.ocode
+    JOIN car TCAR ON SI.tradeserial = TCAR.serialno;
 
 -- Inquire Sales Invoice View --
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
@@ -65,9 +101,9 @@ CREATE OR REPLACE VIEW vehicle_inventory_record AS
   SELECT CAR.serialno, CAR.carmake, CAR.carmodel, CAR.caryear, CAR.carcolor, CAR.cartrim,
     CAR.purchasefrom, CAR.purchaseinvoice, CAR.purchasedate, CAR.purchasecost,
     CAR.listprice, OPT.ocode, OPT.odesc, OPT.olist
-  FROM tbl_car CAR
-    JOIN tbl_base_option BO ON CAR.serialno = BO.serialno
-    JOIN tbl_options OPT ON BO.ocode = OPT.ocode;
+  FROM car CAR
+    JOIN baseoption BO ON CAR.serialno = BO.serialno
+    JOIN options OPT ON BO.ocode = OPT.ocode;
     
 -- Inquire Vehicle Inventory Record View --
 ACCEPT p_serialno PROMPT 'Enter vehicle serial #: '
@@ -126,10 +162,10 @@ CREATE OR REPLACE VIEW service_work AS
     CUST.cprov, CUST.cpostal, CUST.chphone, CUST.cbphone, SVC.serialno, CAR.carmake,
     CAR.carmodel, CAR.caryear, CAR.carcolor, WRK.workdesc, SVC.partcost,
     SVC.labourcost, SVC.tax, SVC.totalcost
-  FROM tbl_service_invoice
-    JOIN tbl_customer CUST ON SVC.cname = CUST.cname
-    JOIN tbl_car CAR ON SVC.serialno = CAR.serialno
-    JOIN tbl_service_work WRK ON SVC.svcinvoice = WRK.svcinvoice;
+  FROM servinv SVC
+    JOIN customer CUST ON SVC.cname = CUST.cname
+    JOIN car CAR ON SVC.serialno = CAR.serialno
+    JOIN servwork WRK ON SVC.svcinvoice = WRK.svcinvoice;
     
 -- Inquire Service Invoice & Work Order --
 ACCEPT p_svcinvoice PROMPT 'Enter your service invoice #: '
@@ -150,9 +186,9 @@ ACCEPT p_bphone PROMPT 'Enter work phone #: '
       '&p_hphone', '&p_bphone');
       
 -- Customer View --
-CREATE OR REPLACE VIEW customer AS
+CREATE OR REPLACE VIEW customer_view AS
   SELECT cname AS full_name, cstreet, ccity, cprov, cpostal, chphone, cbphone
-  FROM tbl_customer;
+  FROM customer;
 
 -- Inquire Customer View --
 ACCEPT p_name PROMPT 'Enter customers name: '
@@ -182,8 +218,8 @@ ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
 -- Prospect List View --
 CREATE OR REPLACE VIEW prospect_list AS
   SELECT cname, carmake, carmodel, caryear, carcolor, cartrim, OPT.odesc
-  FROM tbl_prospect_list PLST
-    JOIN tbl_options OPT ON PLST.ocode = OPT.ocode;
+  FROM prospect PLST
+    JOIN options OPT ON PLST.ocode = OPT.ocode;
     
 -- COMMIT CHANGES TO TABLES --
 COMMIT;
