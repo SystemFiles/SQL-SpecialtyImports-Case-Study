@@ -3,21 +3,21 @@
 -- Desc: Builds the Specialty Imports DataBase Table Structure --
 
 -- START by dropping all existing tables (if any) TOTAL: 10
-DROP TABLE tbl_sales_invoice;
-DROP TABLE tbl_service_invoice;
-DROP TABLE tbl_service_work;
-DROP TABLE tbl_employee;
-DROP TABLE tbl_invoice_option;
-DROP TABLE tbl_prospect_list;
-DROP TABLE tbl_base_option;
-DROP TABLE tbl_car;
-DROP TABLE tbl_customer;
-DROP TABLE tbl_options;
+DROP TABLE saleinv;
+DROP TABLE servinv;
+DROP TABLE servwork;
+DROP TABLE employee;
+DROP TABLE invoice_option;
+DROP TABLE prospect;
+DROP TABLE baseoption;
+DROP TABLE car;
+DROP TABLE customer;
+DROP TABLE options;
 
 -- Create the tables (again if needed) --
 
 -- CUSTOMER TABLE --
-CREATE TABLE tbl_customer (
+CREATE TABLE customer (
   CName CHAR(20) NOT NULL, -- PK
   CStreet CHAR(20) NOT NULL,
   CCity CHAR(20) NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE tbl_customer (
 );
 
 -- OPTIONS TABLE --
-CREATE TABLE tbl_options (
+CREATE TABLE options (
   OCode CHAR(4) NOT NULL, -- PK
   ODesc CHAR(30),
   OList NUMBER(7,2),
@@ -40,7 +40,7 @@ CREATE TABLE tbl_options (
 );
 
 -- SERVICE WORK TABLE --
-CREATE TABLE tbl_service_work (
+CREATE TABLE servwork (
   SvcInvoice CHAR(5) NOT NULL, -- PK
   WorkDesc CHAR(80) NOT NULL,
   -- ADD CONSTRAINTS --
@@ -48,10 +48,10 @@ CREATE TABLE tbl_service_work (
 );
 
 -- EMPLOYEE TABLE --
-CREATE TABLE tbl_employee (
+CREATE TABLE employee (
   EMPName CHAR(20) NOT NULL, -- PK
   StartDate DATE NOT NULL,
-  MManager CHAR(20),
+  Manager CHAR(20),
   CommissionRate NUMBER(2,0),
   Title CHAR(26),
   -- ADD CONSTRAINTS --
@@ -59,17 +59,17 @@ CREATE TABLE tbl_employee (
 );
 
 -- INVOICE OPTION TABLE --
-CREATE TABLE tbl_invoice_option (
+CREATE TABLE invoption (
   SaleInvoice CHAR(6) NOT NULL, -- PK
   OCode CHAR(4) NOT NULL, -- FK
   SalePrice NUMBER(7,2) NOT NULL,
   -- ADD CONSTRAINTS --
     CONSTRAINT pk_invopt_saleinvoice PRIMARY KEY(SaleInvoice),
-    CONSTRAINT fk_invopt_ocode FOREIGN KEY(OCode) REFERENCES tbl_options(OCode)
+    CONSTRAINT fk_invopt_ocode FOREIGN KEY(OCode) REFERENCES options(OCode)
 );
 
 -- PROSPECT LIST TABLE --
-CREATE TABLE tbl_prospect_list (
+CREATE TABLE prospect (
   CName CHAR(20) NOT NULL, -- PK
   CarMake CHAR(10) NOT NULL,
   CarModel CHAR(8),
@@ -79,11 +79,11 @@ CREATE TABLE tbl_prospect_list (
   OCode CHAR(4) NOT NULL, -- FK
   -- ADD CONSTRAINTS --
     CONSTRAINT pk_prosp_cname PRIMARY KEY(CName),
-    CONSTRAINT fk_prosp_ocode FOREIGN KEY(OCode) REFERENCES tbl_options(OCode)
+    CONSTRAINT fk_prosp_ocode FOREIGN KEY(OCode) REFERENCES options(OCode)
 );
 
 -- BASE OPTION TABLE --  (COMPOSITE PK)
-CREATE TABLE tbl_base_option (
+CREATE TABLE baseoption (
   SerialNo CHAR(8) NOT NULL, -- PK
   OCode CHAR(4) NOT NULL, -- PK
   -- ADD CONSTRAINTS --
@@ -91,7 +91,7 @@ CREATE TABLE tbl_base_option (
 );
 
 -- CAR TABLE --
-CREATE TABLE tbl_car (
+CREATE TABLE car (
   SerialNo CHAR(8) NOT NULL, -- PK
   CName CHAR(20), -- FK
   CarMake CHAR(10) NOT NULL,
@@ -109,11 +109,11 @@ CREATE TABLE tbl_car (
   ListPrice NUMBER(9,2),
   -- ADD CONSTRAINTS --
     CONSTRAINT pk_car_serialno PRIMARY KEY(SerialNo),
-    CONSTRAINT fk_car_cname FOREIGN KEY(CName) REFERENCES tbl_customer(CName)
+    CONSTRAINT fk_car_cname FOREIGN KEY(CName) REFERENCES customer(CName)
 );
 
 -- SERVICE INVOICE TABLE --
-CREATE TABLE tbl_service_invoice (
+CREATE TABLE servinv (
   SvcInvoice CHAR(5) NOT NULL, -- PK
   ServiceDate DATE NOT NULL,
   CName CHAR(20) NOT NULL, -- FK
@@ -124,12 +124,12 @@ CREATE TABLE tbl_service_invoice (
   TotalCost NUMBER(8,2),
   -- ADD CONSTRAINTS --
     CONSTRAINT pk_servInv_svcinvoice PRIMARY KEY(SvcInvoice),
-    CONSTRAINT fk_servInv_cname FOREIGN KEY(CName) REFERENCES tbl_customer(CName),
-    CONSTRAINT fk_servInv_carserialno FOREIGN KEY(SerialNo) REFERENCES tbl_car(SerialNo)
+    CONSTRAINT fk_servInv_cname FOREIGN KEY(CName) REFERENCES customer(CName),
+    CONSTRAINT fk_servInv_carserialno FOREIGN KEY(SerialNo) REFERENCES car(SerialNo)
 );
 
 -- SALES INVOICE TABLE --
-CREATE TABLE tbl_sales_invoice (
+CREATE TABLE saleinv (
   SaleInvoice CHAR(6) NOT NULL, -- PK
   CName CHAR(20) NOT NULL, -- FK
   EMPName CHAR(20) NOT NULL, -- FK
@@ -149,9 +149,9 @@ CREATE TABLE tbl_sales_invoice (
   CovProperty CHAR(1),
   -- ADD CONSTRAINTS --
     CONSTRAINT pk_si_salesinvoice PRIMARY KEY(SaleInvoice),
-    CONSTRAINT fk_si_cname FOREIGN KEY(CName) REFERENCES tbl_customer(CName),
-    CONSTRAINT fk_si_empname FOREIGN KEY(EMPName) REFERENCES tbl_employee(EMPName),
-    CONSTRAINT fk_si_carserialno FOREIGN KEY(SerialNo) REFERENCES tbl_car(SerialNo),
+    CONSTRAINT fk_si_cname FOREIGN KEY(CName) REFERENCES customer(CName),
+    CONSTRAINT fk_si_empname FOREIGN KEY(EMPName) REFERENCES employee(EMPName),
+    CONSTRAINT fk_si_carserialno FOREIGN KEY(SerialNo) REFERENCES car(SerialNo),
     CONSTRAINT chk_covfire CHECK(CovFire IN('Y', 'N')),
     CONSTRAINT chk_covliab CHECK(CovLiability IN('Y', 'N')),
     CONSTRAINT chk_covcollission CHECK(CovCollission IN('Y', 'N')),
