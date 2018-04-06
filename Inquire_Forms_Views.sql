@@ -65,16 +65,13 @@ CREATE OR REPLACE VIEW sales_invoice AS
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
   SELECT * 
   FROM sales_invoice
-  WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
+  WHERE UPPER(saleinvoice) LIKE UPPER('&p_invoiceno%');
 
 -- Create new VIR Entry -- (TEMP TOTAL COST/PRICE NUMBERS)
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
 ACCEPT p_city PROMPT 'Enter customers city: '
-ACCEPT p_prov PROMPT 'Enter customers province: '
-  INSERT INTO tbl_customer (cname, cstreet, ccity, cprov)
-    VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
-      
+ACCEPT p_prov PROMPT 'Enter customers province: '    
 ACCEPT p_carserial PROMPT 'Enter car serial #: '
 ACCEPT p_carmake PROMPT 'Enter car make: '
 ACCEPT p_carmodel PROMPT 'Enter car model: '
@@ -92,14 +89,16 @@ ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
-  INSERT INTO tbl_car (serialno, cname, carmake, carmodel, caryear, carcolor,
+  INSERT INTO customer (cname, cstreet, ccity, cprov)
+    VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
+  INSERT INTO car (serialno, cname, carmake, carmodel, caryear, carcolor,
     cartrim, enginetype, purchaseinvoice, purchasedate, purchasefrom, purchasecost,
     freightcost, totalcost, listprice)
       VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
         TO_DATE('&p_purchasedate'), '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
         (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
-   INSERT INTO tbl_options (ocode, odesc, olist, ocost)
+   INSERT INTO options (ocode, odesc, olist, ocost)
       VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
           TO_NUMBER('&p_optioncost'));
 
@@ -119,6 +118,13 @@ ACCEPT p_serialno PROMPT 'Enter vehicle serial #: '
   WHERE UPPER(serialno) LIKE UPPER('&p_serialno%');
 
 -- Create new Service Entry --
+ACCEPT p_carserial PROMPT 'Enter car serial #: '
+ACCEPT p_carmake PROMPT 'Enter car make: '
+ACCEPT p_carmodel PROMPT 'Enter car model: '
+ACCEPT p_caryear PROMPT 'Enter car year: '
+ACCEPT p_carcolor PROMPT 'Enter car color: '
+ACCEPT p_cartrim PROMPT 'Enter car trim: '
+ACCEPT p_carengine PROMPT 'Enter engine type: '
 ACCEPT p_invno PROMPT 'Enter Service Invoice #: '
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
@@ -127,13 +133,6 @@ ACCEPT p_prov PROMPT 'Enter customers province: '
 ACCEPT p_postal PROMPT 'Enter customers postal code: '
 ACCEPT p_hphone PROMPT 'Enter home phone #: '
 ACCEPT p_bphone PROMPT 'Enter work phone #: '
-ACCEPT p_carserial PROMPT 'Enter car serial #: '
-ACCEPT p_carmake PROMPT 'Enter car make: '
-ACCEPT p_carmodel PROMPT 'Enter car model: '
-ACCEPT p_caryear PROMPT 'Enter car year: '
-ACCEPT p_carcolor PROMPT 'Enter car color: '
-ACCEPT p_cartrim PROMPT 'Enter car trim: '
-ACCEPT p_carengine PROMPT 'Enter engine type: '
 ACCEPT p_purchaseinv PROMPT 'Enter purchase invoice #: '
 ACCEPT p_purchasedate PROMPT 'Enter date of purchase: '
 ACCEPT p_purchasefrom PROMPT 'Enter who vehicle purchased from: '
@@ -144,23 +143,25 @@ ACCEPT p_workdesc PROMPT 'Enter work to be done: '
 ACCEPT p_partcost PROMPT 'Enter parts cost: '
 ACCEPT p_labourcost PROMPT 'Enter labour cost: '
 ACCEPT p_tax PROMPT 'Enter tax amount: '
-  INSERT INTO tbl_service_invoice (svcinvoice, servicedate, cname, serialno,
-    partcost, labourcost, tax, totalcost)
-      VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
-        TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), SUM(TO_NUMBER('&p_partcost'), TO_NUMBER('&p_labourcost'),
-        TO_NUMBER('&p_tax')));
-  INSERT INTO tbl_customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
+  INSERT INTO servwork (svcinvoice, workdesc)
+      VALUES ('&p_invno', '&p_workdesc');
+  INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
       '&p_hphone', '&p_bphone');
-  INSERT INTO tbl_car (serialno, cname, carmake, carmodel, caryear, carcolor,
+  INSERT INTO car (serialno, carmake, carmodel, caryear, carcolor,
     cartrim, enginetype, purchaseinvoice, purchasedate, purchasefrom, purchasecost,
     freightcost, totalcost, listprice)
-      VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
+      VALUES ('&p_carserial', '&p_carmake', '&p_carmodel', 
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
         '&p_purchasedate', '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
-        SUM(TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
-  INSERT INTO tbl_service_work (svcinvoice, workdesc)
-    VALUES (p_invno, p_workdesc);
+        (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
+  INSERT INTO servinv (svcinvoice, servicedate, cname, serialno,
+    partcost, labourcost, tax, totalcost)
+      VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
+        TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), (TO_NUMBER('&p_partcost') + TO_NUMBER('&p_labourcost') +
+        TO_NUMBER('&p_tax')));
+   
+      
 
 
 -- Service Invoice & Work Order View --
@@ -177,7 +178,7 @@ CREATE OR REPLACE VIEW service_work AS
 -- Inquire Service Invoice & Work Order --
 ACCEPT p_svcinvoice PROMPT 'Enter your service invoice #: '
   SELECT *
-  FROM service_work
+  FROM servwork
   WHERE UPPER(svcinvoice) LIKE UPPER('&p_svcinvoice%');
   
 -- Enter data for new customer --
@@ -188,7 +189,7 @@ ACCEPT p_prov PROMPT 'Enter customers province: '
 ACCEPT p_postal PROMPT 'Enter customers postal code: '
 ACCEPT p_hphone PROMPT 'Enter home phone #: '
 ACCEPT p_bphone PROMPT 'Enter work phone #: '
-  INSERT INTO tbl_customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
+  INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
       '&p_hphone', '&p_bphone');
       
@@ -214,10 +215,10 @@ ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
-  INSERT INTO tbl_options (ocode, odesc, olist, ocost)
+  INSERT INTO options (ocode, odesc, olist, ocost)
     VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
       TO_NUMBER('&p_optioncost'));
-  INSERT INTO tbl_prospect_list (cname, carmake, carmodel, caryear, carcolor, 
+  INSERT INTO prospect (cname, carmake, carmodel, caryear, carcolor, 
     cartrim, ocode)
       VALUES ('&p_name', '&p_carmake', '&p_carmodel', '&p_caryear',
         '&p_carcolor', '&p_cartrim', '&p_optioncode');
