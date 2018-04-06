@@ -152,9 +152,9 @@ CREATE TABLE saleinv (
     CONSTRAINT fk_si_cname FOREIGN KEY(CName) REFERENCES customer(CName),
     CONSTRAINT fk_si_empname FOREIGN KEY(salesman) REFERENCES employee(EMPName),
     CONSTRAINT fk_si_carserialno FOREIGN KEY(serial) REFERENCES car(serial),
-    CONSTRAINT chk_covfire CHECK(CovFire IN('Y', 'N')),
-    CONSTRAINT chk_covliab CHECK(CovLiability IN('Y', 'N')),
-    CONSTRAINT chk_covcollission CHECK(CovCollission IN('Y', 'N')),
-    CONSTRAINT chk_covproperty CHECK(CovProperty IN('Y', 'N'))
+    CONSTRAINT chk_covfire CHECK(Fire IN('Y', 'N')),
+    CONSTRAINT chk_covliab CHECK(Liability IN('Y', 'N')),
+    CONSTRAINT chk_covcollission CHECK(Collision IN('Y', 'N')),
+    CONSTRAINT chk_covproperty CHECK(Property IN('Y', 'N'))
 );
 
