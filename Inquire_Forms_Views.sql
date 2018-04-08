@@ -46,20 +46,20 @@ ACCEPT p_salestax PROMPT 'Enter sales tax: '
 
 -- Sales Invoice View --
 CREATE OR REPLACE VIEW sales_invoice AS
-  SELECT SI.saleinvoice, SI.saledate, CUST.cname, CUST.cstreet, CUST.ccity, 
-    CUST.cprov, CUST.cpostal, CUST.chphone, EMP.empname, CAR.serialno,
-    CAR.carmake, CAR.carmodel, CAR.caryear, CAR.carcolor, SI.covfire, SI.covcollission,
-    SI.covliability, SI.covproperty, OPT.ocode, OPT.odesc, OPT.olist, SI.tradeserial,
-    TCAR.carmake AS trademake, TCAR.carmodel AS trademodel, TCAR.caryear AS tradeyear, 
-    SI.tradeallowance, SI.totalprice, SI.discount, SI.net, 
-    SI.tax, ((SI.net + SI.tax) - (SI.discount + SI.tradeallowance)) AS "Total Payable" 
+  SELECT SI.saleinv, SI.saledate, CUST.cname, CUST.cstreet, CUST.ccity, 
+    CUST.cprov, CUST.cpostal, CUST.chphone, EMP.empname, CAR.serial,
+    CAR.make, CAR.model, CAR.cyear, CAR.color, SI.fire, SI.collision,
+    SI.liability, SI.property, OPT.ocode, OPT.odesc, OPT.olist, SI.tradeserial,
+    TCAR.make AS trademake, TCAR.model AS trademodel, TCAR.cyear AS tradeyear, 
+    SI.tradeallow, SI.totalprice, SI.discount, SI.net, 
+    SI.tax, ((SI.net + SI.tax) - (SI.discount + SI.tradeallow)) AS "Total Payable" 
   FROM saleinv SI
     JOIN customer CUST ON SI.cname = CUST.cname
-    JOIN employee EMP ON SI.empname = EMP.empname
-    JOIN car CAR ON SI.serialno = CAR.serialno
-    JOIN baseoption BO ON CAR.serialno = BO.serialno
+    JOIN employee EMP ON SI.salesman = EMP.empname
+    JOIN car CAR ON SI.serial = CAR.serial
+    JOIN baseoption BO ON CAR.serial = BO.serial
     JOIN options OPT ON BO.ocode = OPT.ocode
-    JOIN car TCAR ON SI.tradeserial = TCAR.serialno;
+    JOIN car TCAR ON SI.tradeserial = TCAR.serial;
 
 -- Inquire Sales Invoice View --
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
@@ -71,7 +71,7 @@ ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
 ACCEPT p_city PROMPT 'Enter customers city: '
-ACCEPT p_prov PROMPT 'Enter customers province: '    
+ACCEPT p_prov PROMPT 'Enter customers province: '
 ACCEPT p_carserial PROMPT 'Enter car serial #: '
 ACCEPT p_carmake PROMPT 'Enter car make: '
 ACCEPT p_carmodel PROMPT 'Enter car model: '
@@ -104,18 +104,18 @@ ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
 
 -- Vehicle Inventory Record View --
 CREATE OR REPLACE VIEW vehicle_inventory_record AS
-  SELECT CAR.serialno, CAR.carmake, CAR.carmodel, CAR.caryear, CAR.carcolor, CAR.cartrim,
-    CAR.purchasefrom, CAR.purchaseinvoice, CAR.purchasedate, CAR.purchasecost,
+  SELECT CAR.serial, CAR.make, CAR.model, CAR.cyear, CAR.color, CAR.trim,
+    CAR.purchfrom, CAR.purchinv, CAR.purchdate, CAR.purchcost,
     CAR.listprice, OPT.ocode, OPT.odesc, OPT.olist
   FROM car CAR
-    JOIN baseoption BO ON CAR.serialno = BO.serialno
+    JOIN baseoption BO ON CAR.serial = BO.serial
     JOIN options OPT ON BO.ocode = OPT.ocode;
     
 -- Inquire Vehicle Inventory Record View --
-ACCEPT p_serialno PROMPT 'Enter vehicle serial #: '
+ACCEPT p_serial PROMPT 'Enter vehicle serial #: '
   SELECT *
   FROM vehicle_inventory_record
-  WHERE UPPER(serialno) LIKE UPPER('&p_serialno%');
+  WHERE UPPER(serial) LIKE UPPER('&p_serial%');
 
 -- Create new Service Entry --
 ACCEPT p_carserial PROMPT 'Enter car serial #: '
@@ -160,26 +160,23 @@ ACCEPT p_tax PROMPT 'Enter tax amount: '
       VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
         TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), (TO_NUMBER('&p_partcost') + TO_NUMBER('&p_labourcost') +
         TO_NUMBER('&p_tax')));
-   
-      
-
 
 -- Service Invoice & Work Order View --
 CREATE OR REPLACE VIEW service_work AS
-  SELECT SVC.svcinvoice, SVC.servicedate, CUST.cname, CUST.cstreet, CUST.ccity,
-    CUST.cprov, CUST.cpostal, CUST.chphone, CUST.cbphone, SVC.serialno, CAR.carmake,
-    CAR.carmodel, CAR.caryear, CAR.carcolor, WRK.workdesc, SVC.partcost,
+  SELECT SVC.servinv, SVC.serdate, CUST.cname, CUST.cstreet, CUST.ccity,
+    CUST.cprov, CUST.cpostal, CUST.chphone, CUST.cbphone, SVC.serial, CAR.make,
+    CAR.model, CAR.cyear, CAR.color, WRK.workdesc, SVC.partscost,
     SVC.labourcost, SVC.tax, SVC.totalcost
   FROM servinv SVC
     JOIN customer CUST ON SVC.cname = CUST.cname
-    JOIN car CAR ON SVC.serialno = CAR.serialno
-    JOIN servwork WRK ON SVC.svcinvoice = WRK.svcinvoice;
+    JOIN car CAR ON SVC.serial = CAR.serial
+    JOIN servwork WRK ON SVC.servinv = WRK.servinv;
     
 -- Inquire Service Invoice & Work Order --
 ACCEPT p_svcinvoice PROMPT 'Enter your service invoice #: '
   SELECT *
-  FROM servwork
-  WHERE UPPER(svcinvoice) LIKE UPPER('&p_svcinvoice%');
+  FROM service_work
+  WHERE UPPER(servinv) LIKE UPPER('&p_svcinvoice%');
   
 -- Enter data for new customer --
 ACCEPT p_name PROMPT 'Enter customers name: '
@@ -201,7 +198,7 @@ CREATE OR REPLACE VIEW customer_view AS
 -- Inquire Customer View --
 ACCEPT p_name PROMPT 'Enter customers name: '
   SELECT *
-  FROM customer
+  FROM customer_view
   WHERE UPPER(full_name) LIKE UPPER('&p_name%');
 
 -- Create new Prospect Entry --
@@ -225,7 +222,7 @@ ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
 
 -- Prospect List View --
 CREATE OR REPLACE VIEW prospect_list AS
-  SELECT cname, carmake, carmodel, caryear, carcolor, cartrim, OPT.odesc
+  SELECT cname, make, model, cyear, color, trim, OPT.odesc
   FROM prospect PLST
     JOIN options OPT ON PLST.ocode = OPT.ocode;
     
