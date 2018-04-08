@@ -65,7 +65,7 @@ CREATE OR REPLACE VIEW sales_invoice AS
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
   SELECT * 
   FROM sales_invoice
-  WHERE UPPER(saleinvoice) LIKE UPPER('&p_invoiceno%');
+  WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
 
 -- Create new VIR Entry -- (TEMP TOTAL COST/PRICE NUMBERS)
 ACCEPT p_name PROMPT 'Enter customers name: '
@@ -91,8 +91,8 @@ ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
   INSERT INTO customer (cname, cstreet, ccity, cprov)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
-  INSERT INTO car (serialno, cname, carmake, carmodel, caryear, carcolor,
-    cartrim, enginetype, purchaseinvoice, purchasedate, purchasefrom, purchasecost,
+  INSERT INTO car (serial, cname, make, model, cyear, color,
+    trim, enginetype, purchinv, purchdate, purchfrom, purchcost,
     freightcost, totalcost, listprice)
       VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
@@ -143,20 +143,20 @@ ACCEPT p_workdesc PROMPT 'Enter work to be done: '
 ACCEPT p_partcost PROMPT 'Enter parts cost: '
 ACCEPT p_labourcost PROMPT 'Enter labour cost: '
 ACCEPT p_tax PROMPT 'Enter tax amount: '
-  INSERT INTO servwork (svcinvoice, workdesc)
+  INSERT INTO servwork (servinv, workdesc)
       VALUES ('&p_invno', '&p_workdesc');
   INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
       '&p_hphone', '&p_bphone');
-  INSERT INTO car (serialno, carmake, carmodel, caryear, carcolor,
-    cartrim, enginetype, purchaseinvoice, purchasedate, purchasefrom, purchasecost,
+  INSERT INTO car (serial, cname, make, model, cyear, color,
+    trim, enginetype, purchinv, purchdate, purchfrom, purchcost,
     freightcost, totalcost, listprice)
-      VALUES ('&p_carserial', '&p_carmake', '&p_carmodel', 
+      VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
         '&p_purchasedate', '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
         (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
-  INSERT INTO servinv (svcinvoice, servicedate, cname, serialno,
-    partcost, labourcost, tax, totalcost)
+  INSERT INTO servinv (servinv, serdate, cname, serial,
+    partscost, laborcost, tax, totalcost)
       VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
         TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), (TO_NUMBER('&p_partcost') + TO_NUMBER('&p_labourcost') +
         TO_NUMBER('&p_tax')));
@@ -218,8 +218,8 @@ ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
   INSERT INTO options (ocode, odesc, olist, ocost)
     VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
       TO_NUMBER('&p_optioncost'));
-  INSERT INTO prospect (cname, carmake, carmodel, caryear, carcolor, 
-    cartrim, ocode)
+  INSERT INTO prospect (cname, make, model, cyear, color, 
+    trim, ocode)
       VALUES ('&p_name', '&p_carmake', '&p_carmodel', '&p_caryear',
         '&p_carcolor', '&p_cartrim', '&p_optioncode');
 
