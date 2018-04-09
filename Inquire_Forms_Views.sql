@@ -2,9 +2,7 @@
 -- By: Benjamin D. Sykes (991487635) --
 -- Desc: A Program to create views and Interaction from user --
 
--- TODO: Fix all numerical inputs to be converter, Fix summing of data, 
--- And fix ordering of data entry so no primary keys are missing, Finish Sales Invoice Data Entry
--- Rename all tables to their correct names
+-- TODO: ADD EXCEPTIONS and SALES INVOICE --
 
 -- Create Entry Sales Invoice --
 ACCEPT p_saleinv PROMPT 'Enter sales invoice #: '
@@ -57,15 +55,27 @@ CREATE OR REPLACE VIEW sales_invoice AS
     JOIN customer CUST ON SI.cname = CUST.cname
     JOIN employee EMP ON SI.salesman = EMP.empname
     JOIN car CAR ON SI.serial = CAR.serial
-    JOIN baseoption BO ON CAR.serial = BO.serial
-    JOIN options OPT ON BO.ocode = OPT.ocode
+    JOIN invoption IO ON SI.saleinv = IO.saleinv
+    JOIN options OPT ON IO.ocode = OPT.ocode
     JOIN car TCAR ON SI.tradeserial = TCAR.serial;
 
 -- Inquire Sales Invoice View --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
-  SELECT * 
-  FROM sales_invoice
-  WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
+DECLARE
+  v_sales_invoice sales_invoice%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO v_sales_invoice
+    FROM sales_invoice
+    WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
+    :g_output:='Invoice#:'||' '||'&p_invoiceno'; -- FINISH this with all values
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      :g_output:='&p_invoiceno'||' '||'No data found';
+  END;
+  /
+  PRINT g_output;
 
 -- Create new VIR Entry -- (TEMP TOTAL COST/PRICE NUMBERS)
 ACCEPT p_name PROMPT 'Enter customers name: '
@@ -98,6 +108,8 @@ ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
         '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
         TO_DATE('&p_purchasedate'), '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
         (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
+   INSERT INTO baseoption (serial, ocode)
+      VALUES ('&p_carserial', '&p_optioncode');
    INSERT INTO options (ocode, odesc, olist, ocost)
       VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
           TO_NUMBER('&p_optioncost'));
@@ -110,12 +122,30 @@ CREATE OR REPLACE VIEW vehicle_inventory_record AS
   FROM car CAR
     JOIN baseoption BO ON CAR.serial = BO.serial
     JOIN options OPT ON BO.ocode = OPT.ocode;
-    
+
 -- Inquire Vehicle Inventory Record View --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_serial PROMPT 'Enter vehicle serial #: '
-  SELECT *
-  FROM vehicle_inventory_record
-  WHERE UPPER(serial) LIKE UPPER('&p_serial%');
+DECLARE
+  v_vehicle_record vehicle_inventory_record%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO v_vehicle_record
+    FROM vehicle_inventory_record
+    WHERE UPPER(serial) LIKE UPPER('&p_serial%');
+    -- Place into output variable
+    :g_output:='Serial#:'||' '||'&p_serial'||' Make: '||v_vehicle_record.make||' Model: '||v_vehicle_record.model
+    ||' Year: '||v_vehicle_record.cyear||' Color: '||v_vehicle_record.color||' Trim: '||v_vehicle_record.trim
+    ||' PurchFrom '||v_vehicle_record.purchfrom||' PurchInv: '||v_vehicle_record.purchinv
+    ||' PurchDate '||v_vehicle_record.purchdate||' PurchCost: '||v_vehicle_record.purchcost
+    ||' List Price: '||v_vehicle_record.listprice||' OCode: '||v_vehicle_record.ocode
+    ||' ODesc: '||v_vehicle_record.odesc||' OList: '||v_vehicle_record.olist;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      :g_output:='&p_serial'||' '||'Vehicle with that serial # not found.';
+  END;
+  /
+  PRINT g_output;
 
 -- Create new Service Entry --
 ACCEPT p_carserial PROMPT 'Enter car serial #: '
@@ -173,10 +203,24 @@ CREATE OR REPLACE VIEW service_work AS
     JOIN servwork WRK ON SVC.servinv = WRK.servinv;
     
 -- Inquire Service Invoice & Work Order --
+VARIABLE g_output VARCHAR(32000)
 ACCEPT p_svcinvoice PROMPT 'Enter your service invoice #: '
-  SELECT *
-  FROM service_work
-  WHERE UPPER(servinv) LIKE UPPER('&p_svcinvoice%');
+DECLARE
+  v_service_work service_work%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO v_service_work
+    FROM service_work
+    WHERE UPPER(servinv) LIKE UPPER('&p_svcinvoice%');
+    
+    -- Add Output String --
+    
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      :g_output:='&p_svcinvoice:'||' '||'Could not find anything...';
+  END;
+  /
+  PRINT g_output;
   
 -- Enter data for new customer --
 ACCEPT p_name PROMPT 'Enter customers name: '
