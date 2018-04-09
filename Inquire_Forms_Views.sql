@@ -55,12 +55,12 @@ CREATE OR REPLACE VIEW sales_invoice AS
     JOIN customer CUST ON SI.cname = CUST.cname
     JOIN employee EMP ON SI.salesman = EMP.empname
     JOIN car CAR ON SI.serial = CAR.serial
-    JOIN invoption IO ON SI.saleinv = IO.saleinv AND SI.ocode = IO.ocode
+    JOIN invoption IO ON SI.saleinv = IO.saleinv
     JOIN options OPT ON IO.ocode = OPT.ocode
     JOIN car TCAR ON SI.tradeserial = TCAR.serial;
 
 -- Inquire Sales Invoice View --
-VARIABLE g_output VARCHAR2(200)
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_invoiceno PROMPT 'Enter an invoice number: '
 DECLARE
   v_sales_invoice sales_invoice%ROWTYPE;
