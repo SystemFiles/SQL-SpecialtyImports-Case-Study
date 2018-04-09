@@ -69,7 +69,7 @@ DECLARE
     INTO v_sales_invoice
     FROM sales_invoice
     WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
-    :g_output:='Invoice#:'||' '||'&p_invoiceno';
+    :g_output:='Invoice#:'||' '||'&p_invoiceno'; -- FINISH this with all values
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       :g_output:='&p_invoiceno'||' '||'No data found';
@@ -122,8 +122,6 @@ CREATE OR REPLACE VIEW vehicle_inventory_record AS
   FROM car CAR
     JOIN baseoption BO ON CAR.serial = BO.serial
     JOIN options OPT ON BO.ocode = OPT.ocode;
-
-SELECT * FROM vehicle_inventory_record;
 
 -- Inquire Vehicle Inventory Record View --
 VARIABLE g_output VARCHAR2(32000)
@@ -205,10 +203,24 @@ CREATE OR REPLACE VIEW service_work AS
     JOIN servwork WRK ON SVC.servinv = WRK.servinv;
     
 -- Inquire Service Invoice & Work Order --
+VARIABLE g_output VARCHAR(32000)
 ACCEPT p_svcinvoice PROMPT 'Enter your service invoice #: '
-  SELECT *
-  FROM service_work
-  WHERE UPPER(servinv) LIKE UPPER('&p_svcinvoice%');
+DECLARE
+  v_service_work service_work%ROWTYPE;
+  BEGIN
+    SELECT *
+    INTO v_service_work
+    FROM service_work
+    WHERE UPPER(servinv) LIKE UPPER('&p_svcinvoice%');
+    
+    -- Add Output String --
+    
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      :g_output:='&p_svcinvoice:'||' '||'Could not find anything...';
+  END;
+  /
+  PRINT g_output;
   
 -- Enter data for new customer --
 ACCEPT p_name PROMPT 'Enter customers name: '
