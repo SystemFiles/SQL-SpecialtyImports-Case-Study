@@ -1,8 +1,8 @@
 -- User Interaction Script for database for Specialty Imports --
--- By: Benjamin D. Sykes (991487635) --
--- Desc: A Program to create views and Interaction from user --
+-- By: Benjamin D. Sykes (991487635), Amar Khan, Liam Stickney 
+-- Desc: A Program to create views and Interaction from user 
 
--- TODO: ADD EXCEPTIONS and SALES INVOICE --
+-- TODO: ADD EXCEPTIONS and SALES INVOICE INQUIRES/INSERTS --
 
 -- Create Entry Sales Invoice --
 ACCEPT p_saleinv PROMPT 'Enter sales invoice #: '
