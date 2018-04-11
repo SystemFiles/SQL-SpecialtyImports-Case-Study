@@ -50,7 +50,7 @@ CREATE OR REPLACE VIEW sales_invoice AS
     SI.liability, SI.property, OPT.ocode, OPT.odesc, OPT.olist, SI.tradeserial,
     TCAR.make AS trademake, TCAR.model AS trademodel, TCAR.cyear AS tradeyear, 
     SI.tradeallow, SI.totalprice, SI.discount, SI.net, 
-    SI.tax, ((SI.net + SI.tax) - (SI.discount + SI.tradeallow)) AS "Total Payable" 
+    SI.tax, ((SI.net + SI.tax) - (SI.discount + SI.tradeallow)) AS TOTALPAYABLE 
   FROM saleinv SI
     JOIN customer CUST ON SI.cname = CUST.cname
     JOIN employee EMP ON SI.salesman = EMP.empname
@@ -69,7 +69,22 @@ DECLARE
     INTO v_sales_invoice
     FROM sales_invoice
     WHERE UPPER(saleinv) LIKE UPPER('&p_invoiceno%');
-    :g_output:='Invoice#:'||' '||'&p_invoiceno'; -- FINISH this with all values
+    :g_output:='Invoice#:'||' '||'&p_invoiceno' || ' Sale Date: ' || v_sales_invoice.saledate ||
+    ' Cust. Name: '|| v_sales_invoice.cname || ' Cust. Street: ' || v_sales_invoice.cstreet ||
+    ' Cust. City: ' || v_sales_invoice.ccity || ' Cust Province: ' || v_sales_invoice.cprov ||
+    ' Cust. Postal: ' || v_sales_invoice.cpostal || ' Cust. Home Phone ' || v_sales_invoice.chphone ||
+    ' Employee Name: ' || v_sales_invoice.empname || ' Serial Number: ' || v_sales_invoice.serial ||
+    ' Car Make: ' || v_sales_invoice.make || ' Car Model: ' || v_sales_invoice.model ||
+    ' Car Year: ' || v_sales_invoice.cyear || ' Car Color: ' || v_sales_invoice.color ||
+    ' Fire Coverage? ' || v_sales_invoice.fire || ' Collision Coverage? ' || v_sales_invoice.collison ||
+    ' Liability Coverage? ' || v_sales_invoice.liability || ' Property Coverage? ' || v_sales_invoice.property ||
+    ' Option Code: ' || v_sales_invoice.ocode || ' Option Desc.: ' || v_sales_invoice.odesc ||
+    ' Option List: ' || v_sales_invoice.olist || ' Trade-In Serial# : ' || v_sales_invoice.tradeserial ||
+    ' Trade-In Make: ' || v_sales_invoice.trademake || ' Trade-In Model: ' || v_sales_invoice.trademodel ||
+    ' Trade-In Year: ' || v_sales_invoice.tradeyear || ' Trade Allow: ' || v_sales_invoice.tradeallow ||
+    ' Total Price: ' || v_sales_invoice.totalprice || ' Discount: ' || v_sales_invoice.discount ||
+    ' Net Payment: ' || v_sales_invoice.net || ' Tax: ' || v_sales_invoice.tax ||
+    ' Total Payable: ' || v_sales_invoice.TOTALPAYABLE;
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
       :g_output:='&p_invoiceno'||' '||'No data found';
@@ -240,10 +255,25 @@ CREATE OR REPLACE VIEW customer_view AS
   FROM customer;
 
 -- Inquire Customer View --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_name PROMPT 'Enter customers name: '
+DECLARE
+  v_customer_view customer_view%ROWTYPE;
+  BEGIN
   SELECT *
+  INTO v_customer_view
   FROM customer_view
   WHERE UPPER(full_name) LIKE UPPER('&p_name%');
+  :g_output:='Name: ' || ' ' || '&p_name' || ' Street : ' || v_customer_view.cstreet ||
+  ' City: ' || v_customer_view.ccity || ' Province: ' || v_customer_view.cprov ||
+  ' Postal Code: ' || v_customer_view.cpostal || ' Home Phone: ' || v_customer_view.chphone ||
+  ' Business Phone: ' || v_customer_view.cbphone;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+    :g_output:='&p_name'||' '|| 'No customer with that name found.';
+    END;
+    /
+    PRINT g_output;
 
 -- Create new Prospect Entry --
 ACCEPT p_name PROMPT 'Enter customer name: '
