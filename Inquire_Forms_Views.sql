@@ -2,7 +2,7 @@
 -- By: Benjamin D. Sykes (991487635), Amar Khan, Liam Stickney 
 -- Desc: A Program to create views and Interaction from user 
 
--- TODO: ADD EXCEPTIONS and SALES INVOICE INQUIRES/INSERTS --
+-- TODO: FINISH SALES INVOICE............ then we done bois --
 
 -- Create Entry Sales Invoice --
 ACCEPT p_saleinv PROMPT 'Enter sales invoice #: '
@@ -345,7 +345,9 @@ DECLARE
   ' Business Phone: ' || v_customer_view.cbphone;
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
-    :g_output:='&p_name'||' '|| 'No customer with that name found.';
+      :g_output:='&p_name'||' '||'No customer with that name found.';
+    WHEN TOO_MANY_ROWS THEN
+      :g_output:='&p_name'||' '||'Too many customers with that name.';
     END;
     /
     PRINT g_output;
