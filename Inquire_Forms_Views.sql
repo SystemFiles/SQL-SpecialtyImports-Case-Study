@@ -93,6 +93,7 @@ DECLARE
   PRINT g_output;
 
 -- Create new VIR Entry -- (TEMP TOTAL COST/PRICE NUMBERS)
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
 ACCEPT p_city PROMPT 'Enter customers city: '
@@ -113,21 +114,48 @@ ACCEPT p_listprice PROMPT 'Enter car list price: '
 ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
-ACCEPT p_optioncost PROMPT 'Enter cost to us for option: ' 
-  INSERT INTO customer (cname, cstreet, ccity, cprov)
-    VALUES('&p_name', '&p_street', '&p_city', '&p_prov');      
-  INSERT INTO car (serial, cname, make, model, cyear, color,
-    trim, enginetype, purchinv, purchdate, purchfrom, purchcost,
-    freightcost, totalcost, listprice)
-      VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
-        '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
-        TO_DATE('&p_purchasedate'), '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
-        (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
-   INSERT INTO baseoption (serial, ocode)
+ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
+  DECLARE
+    v_null_insert EXCEPTION;
+  BEGIN
+    IF '&p_name' IS NULL THEN
+      RAISE v_null_insert;
+    END IF;
+    INSERT INTO customer (cname, cstreet, ccity, cprov)
+      VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
+    IF '&p_carserial' IS NULL OR '&p_carmake' IS NULL OR '&p_carmodel' 
+      IS NULL OR '&p_carcolor' IS NULL OR '&p_caryear' IS NULL OR '&p_cartrim' IS NULL
+        OR '&p_carengine' IS NULL THEN
+          RAISE v_null_insert;
+    END IF;
+    INSERT INTO car (serial, cname, make, model, cyear, color,
+      trim, enginetype, purchinv, purchdate, purchfrom, purchcost,
+      freightcost, totalcost, listprice)
+        VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
+          '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine', '&p_purchaseinv',
+          TO_DATE('&p_purchasedate'), '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
+          (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
+    IF '&p_optioncode' IS NULL THEN
+      RAISE v_null_insert;
+    END IF;
+    INSERT INTO baseoption (serial, ocode)
       VALUES ('&p_carserial', '&p_optioncode');
-   INSERT INTO options (ocode, odesc, olist, ocost)
+    IF '&p_optiondesc' IS NULL OR '&p_optionprice' IS NULL OR '&p_optioncost' IS NULL THEN
+      RAISE v_null_insert;
+    END IF;
+    INSERT INTO options (ocode, odesc, olist, ocost)
       VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
           TO_NUMBER('&p_optioncost'));
+  EXCEPTION
+    WHEN v_null_insert THEN
+      :g_output:='Error inserting data into VIR. Null value entered for Non-Nullable.';
+    WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='Error inserting data into VIR. Primary key already exists in table.';
+    WHEN INVALID_NUMBER THEN
+      :g_output:='Error inserting data into VIR. Problem converting a number from string inputs';
+  END;
+  /
+  PRINT g_output;
 
 -- Vehicle Inventory Record View --
 CREATE OR REPLACE VIEW vehicle_inventory_record AS
@@ -269,6 +297,7 @@ DECLARE
   PRINT g_output;
   
 -- Enter data for new customer --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
 ACCEPT p_city PROMPT 'Enter customers city: '
@@ -276,9 +305,24 @@ ACCEPT p_prov PROMPT 'Enter customers province: '
 ACCEPT p_postal PROMPT 'Enter customers postal code: '
 ACCEPT p_hphone PROMPT 'Enter home phone #: '
 ACCEPT p_bphone PROMPT 'Enter work phone #: '
-  INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
-    VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
-      '&p_hphone', '&p_bphone');
+  DECLARE
+    v_null_insert EXCEPTION;
+  BEGIN
+    IF '&p_name' IS NULL THEN -- Check for null values
+      RAISE v_null_insert;
+    END IF;
+    INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
+      VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
+        '&p_hphone', '&p_bphone');
+    :g_output:='Data entered successfully into Customer Table!';
+  EXCEPTION
+    WHEN v_null_insert THEN
+      :g_output:='Error inserting data into customer table. Null value entered for Non-Nullable.';
+    WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='Error inserting data into customer table. Primary key already exists in table.';
+  END;
+  /
+  PRINT g_output;
       
 -- Customer View --
 CREATE OR REPLACE VIEW customer_view AS
