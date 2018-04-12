@@ -76,7 +76,7 @@ DECLARE
     ' Employee Name: ' || v_sales_invoice.empname || ' Serial Number: ' || v_sales_invoice.serial ||
     ' Car Make: ' || v_sales_invoice.make || ' Car Model: ' || v_sales_invoice.model ||
     ' Car Year: ' || v_sales_invoice.cyear || ' Car Color: ' || v_sales_invoice.color ||
-    ' Fire Coverage? ' || v_sales_invoice.fire || ' Collision Coverage? ' || v_sales_invoice.collison ||
+    ' Fire Coverage? ' || v_sales_invoice.fire || ' Collision Coverage? ' || v_sales_invoice.collision ||
     ' Liability Coverage? ' || v_sales_invoice.liability || ' Property Coverage? ' || v_sales_invoice.property ||
     ' Option Code: ' || v_sales_invoice.ocode || ' Option Desc.: ' || v_sales_invoice.odesc ||
     ' Option List: ' || v_sales_invoice.olist || ' Trade-In Serial# : ' || v_sales_invoice.tradeserial ||
@@ -138,16 +138,18 @@ CREATE OR REPLACE VIEW vehicle_inventory_record AS
     JOIN baseoption BO ON CAR.serial = BO.serial
     JOIN options OPT ON BO.ocode = OPT.ocode;
 
+
 -- Inquire Vehicle Inventory Record View --
 VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_serial PROMPT 'Enter vehicle serial #: '
+ACCEPT p_ocode PROMPT 'Enter the vehicle Ocode: '
 DECLARE
   v_vehicle_record vehicle_inventory_record%ROWTYPE;
   BEGIN
     SELECT *
     INTO v_vehicle_record
     FROM vehicle_inventory_record
-    WHERE UPPER(serial) LIKE UPPER('&p_serial%');
+    WHERE UPPER(serial) = UPPER('&p_serial') AND UPPER(ocode) = UPPER('&p_ocode');
     -- Place into output variable
     :g_output:='Serial#:'||' '||'&p_serial'||' Make: '||v_vehicle_record.make||' Model: '||v_vehicle_record.model
     ||' Year: '||v_vehicle_record.cyear||' Color: '||v_vehicle_record.color||' Trim: '||v_vehicle_record.trim
@@ -157,7 +159,7 @@ DECLARE
     ||' ODesc: '||v_vehicle_record.odesc||' OList: '||v_vehicle_record.olist;
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
-      :g_output:='&p_serial'||' '||'Vehicle with that serial # not found.';
+      :g_output:='&p_serial'||' '||'Vehicle with that serial # and ocode not found.';
   END;
   /
   PRINT g_output;
@@ -220,19 +222,27 @@ CREATE OR REPLACE VIEW service_work AS
 -- Inquire Service Invoice & Work Order --
 VARIABLE g_output VARCHAR(32000)
 ACCEPT p_svcinvoice PROMPT 'Enter your service invoice #: '
+ACCEPT p_workdesc PROMPT 'Enter the work description: '
 DECLARE
   v_service_work service_work%ROWTYPE;
   BEGIN
     SELECT *
     INTO v_service_work
     FROM service_work
-    WHERE UPPER(servinv) LIKE UPPER('&p_svcinvoice%');
-    
-    -- Add Output String --
-    
+    WHERE UPPER(servinv) = UPPER('&p_svcinvoice') AND UPPER(workdesc) = UPPER('&p_workdesc');
+    :g_output:='Invoice#: ' || ' ' || '&p_svcinvoice' || 'Service date: ' || v_service_work.serdate
+    ||' Customer name: ' || v_service_work.cname || ' Customer street: ' || v_service_work.cstreet
+    ||' Customer city: ' || v_service_work.ccity || ' Customer province: ' || v_service_work.cprov
+    ||' Customer postal code: ' || v_service_work.cpostal || ' Customer home phone: ' || v_service_work.chphone
+    ||' Customer business phone: ' || v_service_work.cbphone || ' Serial#: ' || v_service_work.serial
+    ||' Car make: ' || v_service_work.make || ' Car model: ' || v_service_work.model
+    ||' Car year: ' || v_service_work.cyear || ' Car color: ' || v_service_work.color
+    ||' Work description: ' || v_service_work.workdesc || ' Parts cost: ' || v_service_work.partscost
+    ||' Labour cost: ' || v_service_work.labourcost || ' Tax amount: ' || v_service_work.tax
+    ||' Total cost: ' || v_service_work.totalcost;  
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
-      :g_output:='&p_svcinvoice:'||' '||'Could not find anything...';
+      :g_output:='&p_svcinvoice:'||' '||'Could not find any invoices...';
   END;
   /
   PRINT g_output;
