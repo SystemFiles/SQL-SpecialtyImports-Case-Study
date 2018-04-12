@@ -165,6 +165,7 @@ DECLARE
   PRINT g_output;
 
 -- Create new Service Entry --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_carserial PROMPT 'Enter car serial #: '
 ACCEPT p_carmake PROMPT 'Enter car make: '
 ACCEPT p_carmodel PROMPT 'Enter car model: '
@@ -190,6 +191,15 @@ ACCEPT p_workdesc PROMPT 'Enter work to be done: '
 ACCEPT p_partcost PROMPT 'Enter parts cost: '
 ACCEPT p_labourcost PROMPT 'Enter labour cost: '
 ACCEPT p_tax PROMPT 'Enter tax amount: '
+DECLARE
+  v_null_insert EXCEPTION;
+  BEGIN
+  IF '&p_name' IS NULL OR '&p_carserial' IS NULL OR '&p_carmake' IS NULL OR
+  '&p_carmodel' IS NULL OR '&p_caryear' IS NULL OR '&p_carcolor' IS NULL OR 
+  '&p_cartrim' IS NULL OR '&p_carengine' IS NULL OR '&p_invno' IS NULL OR 
+  '&p_workdesc' IS NULL THEN
+    RAISE v_null_insert;
+  END IF;
   INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
       '&p_hphone', '&p_bphone');
@@ -207,6 +217,13 @@ ACCEPT p_tax PROMPT 'Enter tax amount: '
         TO_NUMBER('&p_tax')));
   INSERT INTO servwork (servinv, workdesc)
       VALUES ('&p_invno', '&p_workdesc');
+  :g_output:='All data successfully entered!';
+  EXCEPTION
+    WHEN v_null_insert THEN
+      :g_output:='Error inserting data. Null value entered for Non-Nullable.';
+  END;
+  /
+  PRINT g_output;
 
 -- Service Invoice & Work Order View --
 CREATE OR REPLACE VIEW service_work AS
@@ -297,28 +314,24 @@ ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
-  EXCEPTION
-    WHEN VALUE_ERROR THEN
-    :g_output:='One or more of the entered values is in incorrect form.';
-  END;
-  /
-  PRINT g_output;
+DECLARE v_null_insert EXCEPTION;
+BEGIN
+  IF '&p_optioncode' IS NULL OR '&p_name' IS NULL OR '&p_carmake' IS NULL THEN
+    RAISE v_null_insert;
+  END IF;
+  INSERT INTO customer (cname)
+    VALUES ('&p_name');
   INSERT INTO options (ocode, odesc, olist, ocost)
     VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
       TO_NUMBER('&p_optioncost'));
-    EXCEPTION
-      WHEN DUP_VAL_ON_INDEX THEN
-      :g_output:='Detected insertion of duplicate value.';
-    END;
-    /
-    PRINT g_output;
   INSERT INTO prospect (cname, make, model, cyear, color, 
     trim, ocode)
       VALUES ('&p_name', '&p_carmake', '&p_carmodel', '&p_caryear',
         '&p_carcolor', '&p_cartrim', '&p_optioncode');
-      EXCEPTION
-        WHEN DUP_VAL_ON_INDEX THEN
-        :g_output:='Detected insertion of duplicate value.';
+    :g_output:='Successfully entered all values!';
+    EXCEPTION
+      WHEN v_null_insert THEN
+        :g_output:='Error inserting values into table. Null value entered for Non-Nullable.';
       END;
       /
       PRINT g_output;
