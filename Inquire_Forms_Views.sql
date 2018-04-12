@@ -221,6 +221,10 @@ DECLARE
   EXCEPTION
     WHEN v_null_insert THEN
       :g_output:='Error inserting data. Null value entered for Non-Nullable.';
+    WHEN INVALID_NUMBER THEN
+      :g_output:='Error inserting data. Invalid number detected.';
+    WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='Error inserting data. Duplicate value detected.';
   END;
   /
   PRINT g_output;
@@ -332,6 +336,10 @@ BEGIN
     EXCEPTION
       WHEN v_null_insert THEN
         :g_output:='Error inserting values into table. Null value entered for Non-Nullable.';
+      WHEN INVALID_NUMBER THEN
+        :g_output:='Error inserting data. Invalid number detected.';
+      WHEN DUP_VAL_ON_INDEX THEN
+        :g_output:='Error inserting data. Duplicate value detected.';
       END;
       /
       PRINT g_output;
