@@ -113,9 +113,9 @@ ACCEPT p_listprice PROMPT 'Enter car list price: '
 ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
-ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
+ACCEPT p_optioncost PROMPT 'Enter cost to us for option: ' 
   INSERT INTO customer (cname, cstreet, ccity, cprov)
-    VALUES('&p_name', '&p_street', '&p_city', '&p_prov');
+    VALUES('&p_name', '&p_street', '&p_city', '&p_prov');      
   INSERT INTO car (serial, cname, make, model, cyear, color,
     trim, enginetype, purchinv, purchdate, purchfrom, purchcost,
     freightcost, totalcost, listprice)
@@ -203,7 +203,7 @@ ACCEPT p_tax PROMPT 'Enter tax amount: '
         '&p_purchasedate', '&p_purchasefrom', TO_NUMBER('&p_purchasecost'), TO_NUMBER('&p_freightcost'),
         (TO_NUMBER('&p_purchasecost') + TO_NUMBER('&p_freightcost')), TO_NUMBER('&p_listprice'));
   INSERT INTO servinv (servinv, serdate, cname, serial,
-    partscost, laborcost, tax, totalcost)
+    partscost, labourcost, tax, totalcost)
       VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
         TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), (TO_NUMBER('&p_partcost') + TO_NUMBER('&p_labourcost') +
         TO_NUMBER('&p_tax')));
@@ -286,6 +286,7 @@ DECLARE
     PRINT g_output;
 
 -- Create new Prospect Entry --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_name PROMPT 'Enter customer name: '
 ACCEPT p_carmake PROMPT 'Enter car make: '
 ACCEPT p_carmodel PROMPT 'Enter car model: '
@@ -296,13 +297,31 @@ ACCEPT p_optioncode PROMPT 'Enter options code: '
 ACCEPT p_optiondesc PROMPT 'Enter description of option: '
 ACCEPT p_optionprice PROMPT 'Enter list price of option: '
 ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
+  EXCEPTION
+    WHEN VALUE_ERROR THEN
+    :g_output:='One or more of the entered values is in incorrect form.';
+  END;
+  /
+  PRINT g_output;
   INSERT INTO options (ocode, odesc, olist, ocost)
     VALUES ('&p_optioncode', '&p_optiondesc', TO_NUMBER('&p_optionprice'), 
       TO_NUMBER('&p_optioncost'));
+    EXCEPTION
+      WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='Detected insertion of duplicate value.';
+    END;
+    /
+    PRINT g_output;
   INSERT INTO prospect (cname, make, model, cyear, color, 
     trim, ocode)
       VALUES ('&p_name', '&p_carmake', '&p_carmodel', '&p_caryear',
         '&p_carcolor', '&p_cartrim', '&p_optioncode');
+      EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+        :g_output:='Detected insertion of duplicate value.';
+      END;
+      /
+      PRINT g_output;
 
 -- Prospect List View --
 CREATE OR REPLACE VIEW prospect_list AS
