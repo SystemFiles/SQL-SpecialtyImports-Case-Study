@@ -148,7 +148,11 @@ ACCEPT p_optioncost PROMPT 'Enter cost to us for option: '
           TO_NUMBER('&p_optioncost'));
   EXCEPTION
     WHEN v_null_insert THEN
-      :g_output:='Error inserting data into customer table. Null value entered for Non-Nullable.';
+      :g_output:='Error inserting data into VIR. Null value entered for Non-Nullable.';
+    WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='Error inserting data into VIR. Primary key already exists in table.';
+    WHEN INVALID_NUMBER THEN
+      :g_output:='Error inserting data into VIR. Problem converting a number from string inputs';
   END;
   /
   PRINT g_output;
@@ -293,6 +297,8 @@ ACCEPT p_bphone PROMPT 'Enter work phone #: '
   EXCEPTION
     WHEN v_null_insert THEN
       :g_output:='Error inserting data into customer table. Null value entered for Non-Nullable.';
+    WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='Error inserting data into customer table. Primary key already exists in table.';
   END;
   /
   PRINT g_output;
