@@ -190,8 +190,6 @@ ACCEPT p_workdesc PROMPT 'Enter work to be done: '
 ACCEPT p_partcost PROMPT 'Enter parts cost: '
 ACCEPT p_labourcost PROMPT 'Enter labour cost: '
 ACCEPT p_tax PROMPT 'Enter tax amount: '
-  INSERT INTO servwork (servinv, workdesc)
-      VALUES ('&p_invno', '&p_workdesc');
   INSERT INTO customer (cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
     VALUES('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal',
       '&p_hphone', '&p_bphone');
@@ -207,6 +205,8 @@ ACCEPT p_tax PROMPT 'Enter tax amount: '
       VALUES ('&p_invno', SYSDATE, '&p_name', '&p_carserial', TO_NUMBER('&p_partcost'),
         TO_NUMBER('&p_labourcost'), TO_NUMBER('&p_tax'), (TO_NUMBER('&p_partcost') + TO_NUMBER('&p_labourcost') +
         TO_NUMBER('&p_tax')));
+  INSERT INTO servwork (servinv, workdesc)
+      VALUES ('&p_invno', '&p_workdesc');
 
 -- Service Invoice & Work Order View --
 CREATE OR REPLACE VIEW service_work AS
