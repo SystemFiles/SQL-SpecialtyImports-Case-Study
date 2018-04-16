@@ -6,7 +6,6 @@
 
 -- Create Entry Sales Invoice --
 ACCEPT p_saleinv PROMPT 'Enter sales invoice #: '
--- SET SALE DATE AS SYSDATE
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
 ACCEPT p_city PROMPT 'Enter customers city: '
@@ -37,9 +36,31 @@ ACCEPT p_tradeyear PROMPT 'Enter trade-in-car year: '
 ACCEPT p_tradecolor PROMPT 'Enter trade-in-car color: '
 ACCEPT p_tradetrim PROMPT 'Enter trade-in-car trim: '
 ACCEPT p_salestallow PROMPT 'Enter trade-in-car allowance: '
+ACCEPT p_totalprice PROMPT 'Enter the total price of the car: '
 ACCEPT p_salesdiscount PROMPT 'Enter Discount on car: '
 ACCEPT p_salestax PROMPT 'Enter sales tax: '
   -- FOLLOW WITH INSERT STATEMENTS --
+    INSERT INTO employee(empname)
+      VALUES ('&p_empname');
+    INSERT INTO customer(cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
+      VALUES ('&p_name', '&p_street', '&p_city', '&p_prov', '&p_postal', '&p_hphone', '&p_bphone');
+    INSERT INTO car (serial, cname, make, model, cyear, color,
+      trim, enginetype)
+      VALUES ('&p_carserial', '&p_name', '&p_carmake', '&p_carmodel', 
+        '&p_caryear', '&p_carcolor', '&p_cartrim', '&p_carengine');
+    INSERT INTO car(serial, make, model, cyear, color, trim, enginetype)
+      VALUES ('&p_tradeserial', '&p_trademake', '&p_trademodel', '&p_tradeyear',
+        '&p_tradecolor', '&p_tradetrim', '&p_carengine');
+    INSERT INTO saleinv(saleinv, cname, salesman, saledate, serial, totalprice, discount, net,
+      tax, tradeserial, tradeallow, fire, collision, liability, property)
+      VALUES ('&p_saleinv', '&p_name', '&p_empname', SYSDATE, '&p_carserial', TO_NUMBER('&p_totalprice'),
+        TO_NUMBER('&p_salesdiscount'), (TO_NUMBER('&p_totalprice') - TO_NUMBER('&p_salesdiscount')),
+        TO_NUMBER('&p_salestax'), '&p_tradeserial', TO_NUMBER('&p_salestallow'), UPPER('&p_salescovFire'), UPPER('&p_salescovCol'),
+        UPPER('&p_salescovLiab'), UPPER('&p_salescovProp'));
+    INSERT INTO options(ocode, odesc, ocost, olist)
+      VALUES ('&p_optioncode', '&p_optiondesc', '&p_optioncost',
+        '&p_optionprice');
+      
 
 
 -- Sales Invoice View --
