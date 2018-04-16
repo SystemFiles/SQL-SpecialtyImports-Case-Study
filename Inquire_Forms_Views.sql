@@ -5,6 +5,7 @@
 -- TODO: FINISH SALES INVOICE............ then we done bois --
 
 -- Create Entry Sales Invoice --
+VARIABLE g_output VARCHAR2(32000)
 ACCEPT p_saleinv PROMPT 'Enter sales invoice #: '
 ACCEPT p_name PROMPT 'Enter customers name: '
 ACCEPT p_street PROMPT 'Enter customers street: '
@@ -39,7 +40,14 @@ ACCEPT p_salestallow PROMPT 'Enter trade-in-car allowance: '
 ACCEPT p_totalprice PROMPT 'Enter the total price of the car: '
 ACCEPT p_salesdiscount PROMPT 'Enter Discount on car: '
 ACCEPT p_salestax PROMPT 'Enter sales tax: '
-  -- FOLLOW WITH INSERT STATEMENTS --
+  DECLARE
+    v_null_insert EXCEPTION;
+  BEGIN
+    -- Check for all primary keys and return null_insert exception
+    IF '&p_saleinv' IS NULL OR '&p_empname' IS NULL OR '&p_name' IS NULL OR
+    '&p_carserial' IS NULL OR '&p_tradeserial' IS NULL OR '&p_optioncode' IS NULL THEN
+      RAISE v_null_insert;
+    END IF;
     INSERT INTO employee(empname)
       VALUES ('&p_empname');
     INSERT INTO customer(cname, cstreet, ccity, cprov, cpostal, chphone, cbphone)
@@ -60,7 +68,16 @@ ACCEPT p_salestax PROMPT 'Enter sales tax: '
     INSERT INTO options(ocode, odesc, ocost, olist)
       VALUES ('&p_optioncode', '&p_optiondesc', '&p_optioncost',
         '&p_optionprice');
-      
+  EXCEPTION
+    WHEN v_null_insert THEN
+      :g_output:='&p_saleinv'||' '||'Error inserting values into sales invoice. Null data entered for non-nullable attributes';
+    WHEN DUP_VAL_ON_INDEX THEN
+      :g_output:='&p_saleinv'||' '||'Error inserting into sales invoice. Duplicate primary key entered.';
+    WHEN INVALID_NUMBER THEN
+      :g_output:='&p_saleinv'||' '||'Error inserting into sales invoice. Invalid number format.';
+  END;
+  / 
+  PRINT g_output;
 
 
 -- Sales Invoice View --
