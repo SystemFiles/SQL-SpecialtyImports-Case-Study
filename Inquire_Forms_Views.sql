@@ -2,7 +2,7 @@
 -- By: Benjamin D. Sykes (991487635), Amar Khan, Liam Stickney 
 -- Desc: A Program to create views and Interaction from user 
 
--- TODO: FINISH SALES INVOICE............ then we done bois --
+-- TODO: NONE WE DONE --
 
 -- Create Entry Sales Invoice --
 VARIABLE g_output VARCHAR2(32000)
@@ -67,7 +67,9 @@ ACCEPT p_salestax PROMPT 'Enter sales tax: '
         UPPER('&p_salescovLiab'), UPPER('&p_salescovProp'));
     INSERT INTO options(ocode, odesc, ocost, olist)
       VALUES ('&p_optioncode', '&p_optiondesc', '&p_optioncost',
-        '&p_optionprice');
+        '&p_optionprice');    
+    INSERT INTO invoption (saleinv, ocode, saleprice)
+      VALUES ('&p_saleinv', '&p_optioncode', '&p_optionprice');
   EXCEPTION
     WHEN v_null_insert THEN
       :g_output:='&p_saleinv'||' '||'Error inserting values into sales invoice. Null data entered for non-nullable attributes';
@@ -78,7 +80,6 @@ ACCEPT p_salestax PROMPT 'Enter sales tax: '
   END;
   / 
   PRINT g_output;
-
 
 -- Sales Invoice View --
 CREATE OR REPLACE VIEW sales_invoice AS
